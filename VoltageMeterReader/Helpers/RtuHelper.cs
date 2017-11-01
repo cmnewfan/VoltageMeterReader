@@ -15,7 +15,10 @@ namespace VoltageMeterReader.Helper
         private String[] mPortsNames;
         private ModbusSerialMaster[] masters;
         private SerialPort[] clients;
-        private ModbusSerialMaster master;
+        private int mBaudrate;
+        private Parity mParity;
+        private int mDataBits;
+        private StopBits mStopBits;
         public delegate void ChangedEventHandler(object o, ProgressChangedEventArgs e);
         private event ChangedEventHandler ValueUpdatedRequest;
         //private Dictionary<ushort, bool> UnfinishedWork = new Dictionary<ushort, bool>();
@@ -30,15 +33,20 @@ namespace VoltageMeterReader.Helper
             }
             else
             {
+                clients = new SerialPort[mPortsNames.Count()];
                 masters = new ModbusSerialMaster[mPortsNames.Count()];
+                mBaudrate = baudrate;
+                mDataBits = dataBits;
+                mParity = parity;
+                mStopBits = stopBits;
+                ValueUpdatedRequest += handler;
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.DoWork += worker_DoWork;
+                worker.WorkerReportsProgress = true;
+                worker.ProgressChanged += worker_ProgressChanged;
+                worker.RunWorkerAsync(parameters);
             }
-            port = Port;
-            FtpDownloadRequest += handler;
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += worker_DoWork;
-            worker.WorkerReportsProgress = true;
-            worker.ProgressChanged += worker_ProgressChanged;
-            worker.RunWorkerAsync(Addresses);
+            
         }
 
         /*public void AddUnfinishedWork(ushort address, bool value)
@@ -86,8 +94,17 @@ namespace VoltageMeterReader.Helper
             }
         }*/
 
-        public bool Connect()
+        public bool Connect(int index=-1)
         {
+            if (index == -1)
+            {
+                for (int i = 0; i < mPortsNames.Count(); i++)
+                {
+                    clients[i] = new SerialPort(mPortsNames[i], mBaudrate, mParity, mDataBits, mStopBits);
+                    clients[i].Open();
+                    masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
+                }
+            }
             if (client != null)
             {
                 client.Close();
