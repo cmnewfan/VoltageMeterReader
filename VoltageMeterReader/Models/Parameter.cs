@@ -8,8 +8,8 @@ namespace VoltageMeterReader.Models
 {
     class Parameter
     {
-        object Value;
-        String Type;
-        ushort Address;
+        public object Value;
+        public String Type;
+        public ushort Address;
     }
 }

@@ -98,39 +98,50 @@ namespace VoltageMeterReader.Helper
         {
             if (index == -1)
             {
-                for (int i = 0; i < mPortsNames.Count(); i++)
+                try
                 {
-                    clients[i] = new SerialPort(mPortsNames[i], mBaudrate, mParity, mDataBits, mStopBits);
-                    clients[i].Open();
-                    masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
+                    for (int i = 0; i < mPortsNames.Count(); i++)
+                    {
+                        clients[i] = new SerialPort(mPortsNames[i], mBaudrate, mParity, mDataBits, mStopBits);
+                        clients[i].Open();
+                        masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Log.LogException(ex);
+                    return false;
                 }
             }
-            if (client != null)
+            else
             {
-                client.Close();
+                if (clients[index] != null)
+                {
+                    clients[index].Close();
+                }
+                if (masters[index] != null)
+                {
+                    masters[index].Dispose();
+                }
+                try
+                {
+                    clients[index] = new SerialPort(mPortsNames[index], 9600, Parity.Even, 8, StopBits.One);
+                    clients[index].Open();
+                    masters[index] = ModbusSerialMaster.CreateRtu(clients[index]);
+                }
+                catch (Exception ex)
+                {
+                    Log.LogException(ex);
+                    return false;
+                }
+                return true;
             }
-            if (master != null)
-            {
-                master.Dispose();
-            }
-            try
-            {
-                client = new SerialPort("COM4", 9600, Parity.Even, 8, StopBits.One);
-                client.Open();
-                //client = new TcpClient(host, int.Parse(port));
-                master = ModbusSerialMaster.CreateRtu(client);
-            }
-            catch (Exception ex)
-            {
-                Log.LogException(ex);
-                return false;
-            }
-            return true;
         }
 
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            FtpDownloadRequest(e.ProgressPercentage, e);
+            ValueUpdatedRequest(e.UserState, e);
         }
 
         float modbusToFloat(int x1, int x2)
@@ -149,44 +160,17 @@ namespace VoltageMeterReader.Helper
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker bgWorker = sender as BackgroundWorker;
-            ushort[] addresses = e.Argument as ushort[];
-            bool ServerConnected = true;
-            Dictionary<ushort, bool> results = new Dictionary<ushort, bool>(addresses.Count());
-            foreach (ushort address in addresses)
-            {
-                results.Add(address, false);
-            }
+            Parameter[] parameters = e.Argument as Parameter[];
+            bool[] ServerConnected = new bool[mPortsNames.Count()];
             while (true)
             {
-                if (ServerConnected)
+                for (int i = 0; i < mPortsNames.Count(); i++)
                 {
-                    try
+                    if (ServerConnected[i])
                     {
-                        bool SetResult = true;
-                        if (UnfinishedWork.Count > 0)
+                        foreach (Parameter parameter in parameters)
                         {
-                            for (int i = 0; i < UnfinishedWork.Count(); i++)
-                            {
-                                if (!UnfinishedWork.ElementAt(i).Value)
-                                {
-                                    lock (UnfinishedWorkLock)
-                                    {
-                                        results.Remove(UnfinishedWork.ElementAt(i).Key);
-                                        results.Add(UnfinishedWork.ElementAt(i).Key, UnfinishedWork.ElementAt(i).Value); 
-                                    }
-                                }
-                                else
-                                {
-                                    SetResult = setValue(results.ElementAt(i).Key, results.ElementAt(i).Value);
-                                }
-                            }
-                        }
-                        if (SetResult)
-                        {
-                            UnfinishedWork.Clear();
-                        }
-                        foreach (ushort address in addresses)
-                        {
+                            if(parameter)
                             bool Value;
                             results.TryGetValue(address, out Value);
                             var c = master.ReadHoldingRegisters(1, 0, 2);
@@ -205,18 +189,66 @@ namespace VoltageMeterReader.Helper
                             }*/
                         }
                     }
-                    catch (Exception ex)
+                }
+                    if (ServerConnected)
                     {
-                        Log.LogException(ex);
+                        try
+                        {
+                            bool SetResult = true;
+                            if (UnfinishedWork.Count > 0)
+                            {
+                                for (int i = 0; i < UnfinishedWork.Count(); i++)
+                                {
+                                    if (!UnfinishedWork.ElementAt(i).Value)
+                                    {
+                                        lock (UnfinishedWorkLock)
+                                        {
+                                            results.Remove(UnfinishedWork.ElementAt(i).Key);
+                                            results.Add(UnfinishedWork.ElementAt(i).Key, UnfinishedWork.ElementAt(i).Value);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        SetResult = setValue(results.ElementAt(i).Key, results.ElementAt(i).Value);
+                                    }
+                                }
+                            }
+                            if (SetResult)
+                            {
+                                UnfinishedWork.Clear();
+                            }
+                            foreach (ushort address in addresses)
+                            {
+                                bool Value;
+                                results.TryGetValue(address, out Value);
+                                var c = master.ReadHoldingRegisters(1, 0, 2);
+                                int low = c[0];
+                                int high = c[1];
+                                var value = modbusToFloat(high, low);
+                                Log.LogEvent(value.ToString());
+                                /*if (c.ElementAt(0) != Value)
+                                {
+                                    results.Remove(address);
+                                    results.Add(address, c.ElementAt(0));
+                                    if (c.ElementAt(0))
+                                    {
+                                        bgWorker.ReportProgress(address);
+                                    }
+                                }*/
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.LogException(ex);
+                            ServerConnected = ReConnect(bgWorker, ServerConnected);
+                            Thread.Sleep(3000);
+                        }
+                    }
+                    else
+                    {
                         ServerConnected = ReConnect(bgWorker, ServerConnected);
                         Thread.Sleep(3000);
                     }
-                }
-                else
-                {
-                    ServerConnected = ReConnect(bgWorker, ServerConnected);
-                    Thread.Sleep(3000);
-                }
                 Thread.Sleep(3000); 
             }
         }
