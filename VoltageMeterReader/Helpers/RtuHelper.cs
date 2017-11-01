@@ -7,12 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Modbus.Device;
 using VoltageMeterReader.Models;
+using System.Threading;
 
 namespace VoltageMeterReader.Helper
 {
     class RtuHelper
     {
-        private String[] mPortsNames;
+        private RTUSerialPort[] mPorts;
         private ModbusSerialMaster[] masters;
         private SerialPort[] clients;
         private int mBaudrate;
@@ -24,17 +25,17 @@ namespace VoltageMeterReader.Helper
         //private Dictionary<ushort, bool> UnfinishedWork = new Dictionary<ushort, bool>();
         //private object UnfinishedWorkLock = new object();
 
-        public RtuHelper(String[] ports_names, Parameter[] parameters, ChangedEventHandler handler, int baudrate=9600, Parity parity=Parity.Even, int dataBits=1, StopBits stopBits=StopBits.One)
+        public RtuHelper(RTUSerialPort[] ports, ChangedEventHandler handler, int baudrate=9600, Parity parity=Parity.Even, int dataBits=1, StopBits stopBits=StopBits.One)
         {
-            mPortsNames = ports_names;
-            if (mPortsNames.Count() <= 0)
+            mPorts = ports;
+            if (mPorts.Count() <= 0)
             {
                 throw new ArgumentOutOfRangeException("串口为空");
             }
             else
             {
-                clients = new SerialPort[mPortsNames.Count()];
-                masters = new ModbusSerialMaster[mPortsNames.Count()];
+                clients = new SerialPort[mPorts.Count()];
+                masters = new ModbusSerialMaster[mPorts.Count()];
                 mBaudrate = baudrate;
                 mDataBits = dataBits;
                 mParity = parity;
@@ -44,7 +45,7 @@ namespace VoltageMeterReader.Helper
                 worker.DoWork += worker_DoWork;
                 worker.WorkerReportsProgress = true;
                 worker.ProgressChanged += worker_ProgressChanged;
-                worker.RunWorkerAsync(parameters);
+                worker.RunWorkerAsync();
             }
             
         }
@@ -98,11 +99,10 @@ namespace VoltageMeterReader.Helper
         {
             if (index == -1)
             {
-                try
+         s       try
                 {
-                    for (int i = 0; i < mPortsNames.Count(); i++)
+                    for (int i = 0; i < mPorts.Count(); i++)
                     {
-                        clients[i] = new SerialPort(mPortsNames[i], mBaudrate, mParity, mDataBits, mStopBits);
                         clients[i].Open();
                         masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
                     }
@@ -126,7 +126,6 @@ namespace VoltageMeterReader.Helper
                 }
                 try
                 {
-                    clients[index] = new SerialPort(mPortsNames[index], 9600, Parity.Even, 8, StopBits.One);
                     clients[index].Open();
                     masters[index] = ModbusSerialMaster.CreateRtu(clients[index]);
                 }
@@ -160,98 +159,45 @@ namespace VoltageMeterReader.Helper
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker bgWorker = sender as BackgroundWorker;
-            Parameter[] parameters = e.Argument as Parameter[];
-            bool[] ServerConnected = new bool[mPortsNames.Count()];
+            bool[] ServerConnected = new bool[mPorts.Count()];
             while (true)
             {
-                for (int i = 0; i < mPortsNames.Count(); i++)
+                for (int i = 0; i < mPorts.Count(); i++)
                 {
                     if (ServerConnected[i])
                     {
-                        foreach (Parameter parameter in parameters)
+                        foreach(RTUSlave slave in mPorts[i].mSlaves)
                         {
-                            if(parameter)
-                            bool Value;
-                            results.TryGetValue(address, out Value);
-                            var c = master.ReadHoldingRegisters(1, 0, 2);
-                            int low = c[0];
-                            int high = c[1];
-                            var value = modbusToFloat(high, low);
-                            Log.LogEvent(value.ToString());
-                            /*if (c.ElementAt(0) != Value)
+                            foreach(Parameter parameter in slave.mParameters)
                             {
-                                results.Remove(address);
-                                results.Add(address, c.ElementAt(0));
-                                if (c.ElementAt(0))
-                                {
-                                    bgWorker.ReportProgress(address);
-                                }
-                            }*/
-                        }
-                    }
-                }
-                    if (ServerConnected)
-                    {
-                        try
-                        {
-                            bool SetResult = true;
-                            if (UnfinishedWork.Count > 0)
-                            {
-                                for (int i = 0; i < UnfinishedWork.Count(); i++)
-                                {
-                                    if (!UnfinishedWork.ElementAt(i).Value)
-                                    {
-                                        lock (UnfinishedWorkLock)
-                                        {
-                                            results.Remove(UnfinishedWork.ElementAt(i).Key);
-                                            results.Add(UnfinishedWork.ElementAt(i).Key, UnfinishedWork.ElementAt(i).Value);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        SetResult = setValue(results.ElementAt(i).Key, results.ElementAt(i).Value);
+                                try 
+                                {	        
+		                            if(parameter.Type.Equals("Single"))
+                                    { 
+                                        var c = masters[i].ReadHoldingRegisters(slave.mSlaveId,parameter.Address,2);
+                                        int low = c[0];
+                                        int high = c[1];
+                                        parameter.Value = modbusToFloat(high, low);
+                                        bgWorker.ReportProgress(0,parameter);
                                     }
                                 }
-                            }
-                            if (SetResult)
-                            {
-                                UnfinishedWork.Clear();
-                            }
-                            foreach (ushort address in addresses)
-                            {
-                                bool Value;
-                                results.TryGetValue(address, out Value);
-                                var c = master.ReadHoldingRegisters(1, 0, 2);
-                                int low = c[0];
-                                int high = c[1];
-                                var value = modbusToFloat(high, low);
-                                Log.LogEvent(value.ToString());
-                                /*if (c.ElementAt(0) != Value)
+                                catch (Exception ex)
                                 {
-                                    results.Remove(address);
-                                    results.Add(address, c.ElementAt(0));
-                                    if (c.ElementAt(0))
-                                    {
-                                        bgWorker.ReportProgress(address);
-                                    }
-                                }*/
+                                    Log.LogException(ex);
+                                    ServerConnected[i] = Connect(i);
+                                }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.LogException(ex);
-                            ServerConnected = ReConnect(bgWorker, ServerConnected);
-                            Thread.Sleep(3000);
                         }
                     }
                     else
                     {
-                        ServerConnected = ReConnect(bgWorker, ServerConnected);
-                        Thread.Sleep(3000);
+                        ServerConnected[i] = Connect(i);
                     }
-                Thread.Sleep(3000); 
+                }
+                Thread.Sleep(3000);
             }
         }
+         
 
         private bool ReConnect(BackgroundWorker bgWorker, bool ServerConnected)
         {

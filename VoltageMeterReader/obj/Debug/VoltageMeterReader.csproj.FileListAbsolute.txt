@@ -1,1 +1,2 @@
 c:\users\hzfd\documents\visual studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\bin\Debug\VoltageMeterReader.exe.config
+C:\Users\90634\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\bin\Debug\VoltageMeterReader.exe.config
