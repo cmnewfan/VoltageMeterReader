@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace VoltageMeterReader.Helper
 {
-    class RtuHelper
+    public class RtuHelper
     {
         private RTUSerialPort[] mPorts;
         private ModbusSerialMaster[] masters;
@@ -99,7 +99,7 @@ namespace VoltageMeterReader.Helper
         {
             if (index == -1)
             {
-         s       try
+                try
                 {
                     for (int i = 0; i < mPorts.Count(); i++)
                     {
@@ -172,13 +172,12 @@ namespace VoltageMeterReader.Helper
                             {
                                 try 
                                 {	        
-		                            if(parameter.Type.Equals("Single"))
+		                            if(parameter.mType.Equals("Single"))
                                     { 
-                                        var c = masters[i].ReadHoldingRegisters(slave.mSlaveId,parameter.Address,2);
+                                        var c = masters[i].ReadHoldingRegisters(slave.mSlaveId,parameter.mAddress,2);
                                         int low = c[0];
                                         int high = c[1];
-                                        parameter.Value = modbusToFloat(high, low);
-                                        bgWorker.ReportProgress(0,parameter);
+                                        parameter.mValue = modbusToFloat(high, low);
                                     }
                                 }
                                 catch (Exception ex)

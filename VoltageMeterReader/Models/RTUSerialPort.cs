@@ -7,9 +7,16 @@ using System.Threading.Tasks;
 
 namespace VoltageMeterReader.Models
 {
-    class RTUSerialPort : SerialPort
+    public class RTUSerialPort : SerialPort
     {
         public RTUSlave[] mSlaves;
         public String mPortName;
+        public String mDisplayName;
+        public RTUSerialPort(RTUSlave[] slaves, String portName, String displayName)
+        {
+            mSlaves = slaves;
+            mPortName = portName;
+            mDisplayName = displayName; 
+        }
     }
 }

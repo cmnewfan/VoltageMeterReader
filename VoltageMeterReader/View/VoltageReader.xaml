@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="VoltageMeterReader.View.VoltageReader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="360">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"></ColumnDefinition>
+            <ColumnDefinition Width="180"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Name="ReaderName" Content="VoltageReader" HorizontalAlignment="Center" Grid.Column="0"></Label>
+        <Label Name="ReaderValue" Content="ReaderValue" HorizontalAlignment="Center" Grid.Column="1"></Label>
+    </Grid>
+</UserControl>

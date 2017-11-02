@@ -6,9 +6,16 @@ using System.Threading.Tasks;
 
 namespace VoltageMeterReader.Models
 {
-    class RTUSlave
+    public class RTUSlave
     {
         public byte mSlaveId;
         public Parameter[] mParameters;
+        public String mDisplayName;
+        public RTUSlave(byte slaveId, Parameter[] parameters, String name)
+        {
+            mSlaveId = slaveId;
+            mParameters = parameters;
+            mDisplayName = name;
+        }
     }
 }
