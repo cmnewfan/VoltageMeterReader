@@ -10,7 +10,6 @@ C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMe
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\VoltageMeter.g.cs
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\VoltageReader.g.cs
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\App.g.cs
-C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\GeneratedInternalTypeHelper.g.cs
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader_MarkupCompile.cache
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader_MarkupCompile.lref
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\VoltageMeter.baml
@@ -19,4 +18,3 @@ C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMe
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.csproj.GenerateResource.Cache
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.exe
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.pdb
-C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.csprojResolveAssemblyReference.cache

@@ -39,12 +39,22 @@ namespace VoltageMeterReader
                       select new RTUSerialPort((from Slave in Port.Descendants("Slave") 
                                                 select new RTUSlave(byte.Parse(Slave.Attribute("SlaveId").Value), (from Parameter in Slave.Descendants("Parameter") 
                                                                                                                    select new Parameter(Parameter.Attribute("Type").Value, ushort.Parse(Parameter.Attribute("Address").Value), Parameter.Attribute("Name").Value)).ToArray<Parameter>(), Slave.Attribute("SlaveName").Value)).ToArray<RTUSlave>(), Port.Attribute("PortName").Value, Port.Attribute("DisplayName").Value)).ToArray<RTUSerialPort>();
+            int row = 0;
+            int column = 0;
             for (int i = 0; i < mPorts.Count(); i++)
             {
                 for (int j = 0; j < mPorts[i].mSlaves.Count(); j++)
                 {
                     VoltageMeterReader.View.VoltageMeter meter = new View.VoltageMeter();
                     mVoltageGrid.Children.Add(new VoltageMeterReader.View.VoltageMeter());
+                    meter.SetValue(Grid.RowProperty, row);
+                    meter.SetValue(Grid.ColumnProperty, column);
+                    column++;
+                    if (column == 2)
+                    {
+                        column = 0;
+                        row++;
+                    }
                     SetDataBindings(meter, mPorts[i].mSlaves[j]);
                 }
             }
