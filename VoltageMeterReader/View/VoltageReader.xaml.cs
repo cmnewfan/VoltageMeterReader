@@ -12,17 +12,27 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VoltageMeterReader.Models;
 
 namespace VoltageMeterReader.View
 {
     /// <summary>
     /// VoltageReader.xaml 的交互逻辑
     /// </summary>
+    /// 
+    
+
+
     public partial class VoltageReader : UserControl
     {
         public VoltageReader()
         {
             InitializeComponent();
+        }
+
+        public void setDataSource(Parameter source)
+        {
+            ReaderValue.DataContext = source;
         }
     }
 }

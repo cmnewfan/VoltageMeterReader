@@ -29,7 +29,7 @@
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>
-			<Slave SlaveId="1" SlaveName="Slave2">
+			<Slave SlaveId="2" SlaveName="Slave2">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
 				<Parameter Type="Single" Address="4" Name="Parameter-3"/>	
@@ -55,7 +55,7 @@
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>
-			<Slave SlaveId="1" SlaveName="Slave3">
+			<Slave SlaveId="3" SlaveName="Slave3">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
 				<Parameter Type="Single" Address="4" Name="Parameter-3"/>	
@@ -81,7 +81,7 @@
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>
-			<Slave SlaveId="1" SlaveName="Slave4">
+			<Slave SlaveId="4" SlaveName="Slave4">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
 				<Parameter Type="Single" Address="4" Name="Parameter-3"/>	

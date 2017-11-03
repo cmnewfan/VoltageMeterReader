@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:data="clr-namespace:VoltageMeterReader.Models"
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="360">
     <Grid>
@@ -14,6 +15,6 @@
             <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
         <Label Name="ReaderName" Content="VoltageReader" HorizontalAlignment="Center" Grid.Column="0"></Label>
-        <Label Name="ReaderValue" Content="ReaderValue" HorizontalAlignment="Center" Grid.Column="1"></Label>
+        <Label Name="ReaderValue" Content="{Binding Path=mValue}" HorizontalAlignment="Center" Grid.Column="1"></Label>
     </Grid>
 </UserControl>

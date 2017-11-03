@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Modbus.Device;
 using VoltageMeterReader.Models;
-using System.Threading;
+using System.Timers;
+using VoltageMeterReader.Helpers;
 
 namespace VoltageMeterReader.Helper
 {
@@ -16,6 +17,7 @@ namespace VoltageMeterReader.Helper
         private RTUSerialPort[] mPorts;
         private ModbusSerialMaster[] masters;
         private SerialPort[] clients;
+        private bool[] RtuConnected;
         private int mBaudrate;
         private Parity mParity;
         private int mDataBits;
@@ -25,7 +27,7 @@ namespace VoltageMeterReader.Helper
         //private Dictionary<ushort, bool> UnfinishedWork = new Dictionary<ushort, bool>();
         //private object UnfinishedWorkLock = new object();
 
-        public RtuHelper(RTUSerialPort[] ports, ChangedEventHandler handler, int baudrate=9600, Parity parity=Parity.Even, int dataBits=1, StopBits stopBits=StopBits.One)
+        public RtuHelper(RTUSerialPort[] ports, ChangedEventHandler handler, int baudrate=9600, Parity parity=Parity.Even, int dataBits=8, StopBits stopBits=StopBits.One)
         {
             mPorts = ports;
             if (mPorts.Count() <= 0)
@@ -36,18 +38,71 @@ namespace VoltageMeterReader.Helper
             {
                 clients = new SerialPort[mPorts.Count()];
                 masters = new ModbusSerialMaster[mPorts.Count()];
+                RtuConnected = new bool[mPorts.Count()];
                 mBaudrate = baudrate;
                 mDataBits = dataBits;
                 mParity = parity;
                 mStopBits = stopBits;
+                Connect();
                 ValueUpdatedRequest += handler;
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.DoWork += worker_DoWork;
-                worker.WorkerReportsProgress = true;
-                worker.ProgressChanged += worker_ProgressChanged;
-                worker.RunWorkerAsync();
+                
             }
             
+        }
+
+        void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            /*BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += worker_DoWork;
+            worker.WorkerReportsProgress = true;
+            worker.ProgressChanged += worker_ProgressChanged;
+            worker.RunWorkerAsync();*/
+            int PortID = ((ExTimer)sender).TimerID;
+            for (int i=0;i<mPorts[PortID].mSlaves.Count();i++)
+            {
+                RTUSlave slave = mPorts[PortID].mSlaves[i];
+                ExTimer timer = new ExTimer();
+                timer.TimerID = i;
+                timer.AutoReset = false;
+                timer.Interval = 10;
+                timer.Elapsed += delegate(object slave_sender, ElapsedEventArgs slave_e)
+                {
+                    int slaveID = ((ExTimer)slave_sender).TimerID;
+                    int num = 0;
+                    foreach (ReadingList list in slave.mSingleReadingList)
+                    {
+                        var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2*list.mNum));
+                        for (int j=0; j < list.mNum; j++)
+                        {
+                            Parameter param = mPorts[PortID].mSlaves[slaveID].mSingleParameters[num];
+                            int low = c[j * 2];
+                            int high = c[j * 2 + 1];
+                            param.mValue = modbusToFloat(high, low);
+                            num++;
+                        }
+                    }
+                    num = 0;
+                    foreach (ReadingList list in slave.mBoolReadingList)
+                    {
+                        var c = masters[PortID].ReadCoils(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                        for (int j = 0; j < list.mNum; j++)
+                        {
+                            Parameter param = mPorts[PortID].mSlaves[slaveID].mBoolParameters[num];
+                            param.mValue = c[j];
+                            num++;
+                        }
+                    }
+                    /*var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, 0, 48);
+                    for (int j = 0; j < mPorts[PortID].mSlaves[slaveID].mParameters.Count(); j++)
+                    {
+                        Parameter param = mPorts[PortID].mSlaves[slaveID].mParameters[j];
+                        int low = c[j*2];
+                        int high = c[j*2+1];
+                        param.mValue = modbusToFloat(high, low);
+                    }*/
+                };
+                timer.Start();
+            }
         }
 
         /*public void AddUnfinishedWork(ushort address, bool value)
@@ -103,8 +158,15 @@ namespace VoltageMeterReader.Helper
                 {
                     for (int i = 0; i < mPorts.Count(); i++)
                     {
+                        clients[i] = new SerialPort(mPorts[i].mPortName, mBaudrate, mParity, mDataBits, mStopBits);
                         clients[i].Open();
                         masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
+                        ExTimer timer = new ExTimer();
+                        timer.AutoReset = true;
+                        timer.Interval = 1000;
+                        timer.Elapsed += timer_Elapsed;
+                        timer.TimerID = i;
+                        timer.Start();
                     }
                     return true;
                 }
@@ -126,6 +188,7 @@ namespace VoltageMeterReader.Helper
                 }
                 try
                 {
+                    clients[index] = new SerialPort(mPorts[index].mPortName,mBaudrate,mParity,mDataBits,mStopBits);
                     clients[index].Open();
                     masters[index] = ModbusSerialMaster.CreateRtu(clients[index]);
                 }
@@ -160,21 +223,21 @@ namespace VoltageMeterReader.Helper
         {
             BackgroundWorker bgWorker = sender as BackgroundWorker;
             bool[] ServerConnected = new bool[mPorts.Count()];
-            while (true)
-            {
+            //while (true)
+            //{
                 for (int i = 0; i < mPorts.Count(); i++)
                 {
                     if (ServerConnected[i])
                     {
                         foreach(RTUSlave slave in mPorts[i].mSlaves)
                         {
-                            foreach(Parameter parameter in slave.mParameters)
+                            foreach (Parameter parameter in slave.mParameters)
                             {
-                                try 
-                                {	        
-		                            if(parameter.mType.Equals("Single"))
-                                    { 
-                                        var c = masters[i].ReadHoldingRegisters(slave.mSlaveId,parameter.mAddress,2);
+                                try
+                                {
+                                    if (parameter.mType.Equals("Single"))
+                                    {
+                                        var c = masters[i].ReadHoldingRegisters(slave.mSlaveId, parameter.mAddress, 2);
                                         int low = c[0];
                                         int high = c[1];
                                         parameter.mValue = modbusToFloat(high, low);
@@ -193,8 +256,7 @@ namespace VoltageMeterReader.Helper
                         ServerConnected[i] = Connect(i);
                     }
                 }
-                Thread.Sleep(3000);
-            }
+            //}
         }
          
 

@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace VoltageMeterReader.Models
 {
@@ -29,6 +31,8 @@ namespace VoltageMeterReader.Models
         public String mType;
         public ushort mAddress;
         public String mName;
+
+        public Parameter() { }
         public Parameter(String type, ushort address, String name)
         {
             mType = type;

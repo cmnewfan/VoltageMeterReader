@@ -2,7 +2,7 @@
 <!-- edited with XML Explorer v2.0 by Mergesoft (www.mergesoft.com)-->
 <Configuration>
 	<SerialPort>
-		<Port PortName="COM1" VoltageName="Voltage1">
+		<Port PortName="COM1" DisplayName="Voltage1">
 			<Slave SlaveId="1" SlaveName="Slave1">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
@@ -29,7 +29,7 @@
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>
-			<Slave SlaveId="1" SlaveName="Slave2">
+			<Slave SlaveId="2" SlaveName="Slave2">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
 				<Parameter Type="Single" Address="4" Name="Parameter-3"/>	
@@ -55,7 +55,7 @@
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>
-			<Slave SlaveId="1" SlaveName="Slave3">
+			<Slave SlaveId="3" SlaveName="Slave3">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
 				<Parameter Type="Single" Address="4" Name="Parameter-3"/>	
@@ -81,29 +81,29 @@
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>
-			<Slave SlaveId="1" SlaveName="Slave4">
+			<Slave SlaveId="4" SlaveName="Slave4">
 				<Parameter Type="Single" Address="0" Name="Parameter-1"/>	
 				<Parameter Type="Single" Address="2" Name="Parameter-2"/>	
 				<Parameter Type="Single" Address="4" Name="Parameter-3"/>	
 				<Parameter Type="Single" Address="6" Name="Parameter-4"/>	
 				<Parameter Type="Single" Address="8" Name="Parameter-5"/>	
 				<Parameter Type="Single" Address="10" Name="Parameter-6"/>	
+				<Parameter Type="Single" Address="30" Name="Parameter-16"/>	
+				<Parameter Type="Single" Address="32" Name="Parameter-17"/>	
 				<Parameter Type="Single" Address="12" Name="Parameter-7"/>	
 				<Parameter Type="Single" Address="14" Name="Parameter-8"/>	
 				<Parameter Type="Single" Address="16" Name="Parameter-9"/>	
 				<Parameter Type="Single" Address="18" Name="Parameter-10"/>	
-				<Parameter Type="Single" Address="20" Name="Parameter-11"/>	
-				<Parameter Type="Single" Address="22" Name="Parameter-12"/>	
-				<Parameter Type="Single" Address="24" Name="Parameter-13"/>	
-				<Parameter Type="Single" Address="26" Name="Parameter-14"/>	
-				<Parameter Type="Single" Address="28" Name="Parameter-15"/>	
-				<Parameter Type="Single" Address="30" Name="Parameter-16"/>	
-				<Parameter Type="Single" Address="32" Name="Parameter-17"/>	
 				<Parameter Type="Single" Address="34" Name="Parameter-18"/>	
 				<Parameter Type="Single" Address="36" Name="Parameter-19"/>	
 				<Parameter Type="Single" Address="38" Name="Parameter-20"/>	
 				<Parameter Type="Single" Address="40" Name="Parameter-21"/>	
 				<Parameter Type="Single" Address="42" Name="Parameter-22"/>	
+				<Parameter Type="Single" Address="20" Name="Parameter-11"/>	
+				<Parameter Type="Single" Address="22" Name="Parameter-12"/>	
+				<Parameter Type="Single" Address="24" Name="Parameter-13"/>	
+				<Parameter Type="Single" Address="26" Name="Parameter-14"/>	
+				<Parameter Type="Single" Address="28" Name="Parameter-15"/>	
 				<Parameter Type="Single" Address="44" Name="Parameter-23"/>	
 				<Parameter Type="Single" Address="46" Name="Parameter-24"/>	
 			</Slave>

@@ -46,11 +46,11 @@ namespace VoltageMeterReader
                 for (int j = 0; j < mPorts[i].mSlaves.Count(); j++)
                 {
                     VoltageMeterReader.View.VoltageMeter meter = new View.VoltageMeter();
-                    mVoltageGrid.Children.Add(new VoltageMeterReader.View.VoltageMeter());
-                    meter.SetValue(Grid.RowProperty, row);
-                    meter.SetValue(Grid.ColumnProperty, column);
+                    mVoltageGrid.Children.Add(meter);
+                    Grid.SetColumn(meter, column);
+                    Grid.SetRow(meter, row);
                     column++;
-                    if (column == 2)
+                    if (column == 3)
                     {
                         column = 0;
                         row++;
@@ -64,13 +64,14 @@ namespace VoltageMeterReader
         private void SetDataBindings(View.VoltageMeter meter, RTUSlave rtuSlave)
         {
             meter.setName(rtuSlave.mDisplayName);
+            List<View.VoltageReader> readers = new List<View.VoltageReader>();
+            meter.mListView.ItemsSource = readers;
             for (int i = 0; i < rtuSlave.mParameters.Count(); i++)
             {
                 View.VoltageReader reader = new View.VoltageReader();
+                reader.DataContext = rtuSlave.mParameters[i];
+                readers.Add(reader);
                 reader.ReaderName.Content = rtuSlave.mParameters[i].mName;
-                Binding binding = new Binding();
-                binding.Source = rtuSlave.mParameters[i].mValue;
-                reader.ReaderValue.SetBinding(Label.ContentProperty, binding);
             }
         }
     }
