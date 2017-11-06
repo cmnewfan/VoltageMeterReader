@@ -63,43 +63,38 @@ namespace VoltageMeterReader.Helper
                 RTUSlave slave = mPorts[PortID].mSlaves[i];
                 ExTimer timer = new ExTimer();
                 timer.TimerID = i;
-                timer.AutoReset = false;
-                timer.Interval = 10;
+                timer.AutoReset = true;
+                timer.Interval = 1000;
                 timer.Elapsed += delegate(object slave_sender, ElapsedEventArgs slave_e)
                 {
                     int slaveID = ((ExTimer)slave_sender).TimerID;
                     int num = 0;
-                    foreach (ReadingList list in slave.mSingleReadingList)
+                    if (RtuConnected[PortID])
                     {
-                        var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2*list.mNum));
-                        for (int j=0; j < list.mNum; j++)
+                        foreach (ReadingList list in slave.mSingleReadingList)
                         {
-                            Parameter param = mPorts[PortID].mSlaves[slaveID].mSingleParameters[num];
-                            int low = c[j * 2];
-                            int high = c[j * 2 + 1];
-                            param.mValue = modbusToFloat(high, low);
-                            num++;
+                            var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                            for (int j = 0; j < list.mNum; j++)
+                            {
+                                Parameter param = mPorts[PortID].mSlaves[slaveID].mSingleParameters[num];
+                                int low = c[j * 2];
+                                int high = c[j * 2 + 1];
+                                param.mValue = modbusToFloat(high, low);
+                                num++;
+                            }
+                        }
+                        num = 0;
+                        foreach (ReadingList list in slave.mBoolReadingList)
+                        {
+                            var c = masters[PortID].ReadCoils(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                            for (int j = 0; j < list.mNum; j++)
+                            {
+                                Parameter param = mPorts[PortID].mSlaves[slaveID].mBoolParameters[num];
+                                param.mValue = c[j];
+                                num++;
+                            }
                         }
                     }
-                    num = 0;
-                    foreach (ReadingList list in slave.mBoolReadingList)
-                    {
-                        var c = masters[PortID].ReadCoils(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
-                        for (int j = 0; j < list.mNum; j++)
-                        {
-                            Parameter param = mPorts[PortID].mSlaves[slaveID].mBoolParameters[num];
-                            param.mValue = c[j];
-                            num++;
-                        }
-                    }
-                    /*var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, 0, 48);
-                    for (int j = 0; j < mPorts[PortID].mSlaves[slaveID].mParameters.Count(); j++)
-                    {
-                        Parameter param = mPorts[PortID].mSlaves[slaveID].mParameters[j];
-                        int low = c[j*2];
-                        int high = c[j*2+1];
-                        param.mValue = modbusToFloat(high, low);
-                    }*/
                 };
                 timer.Start();
             }
@@ -154,27 +149,43 @@ namespace VoltageMeterReader.Helper
         {
             if (index == -1)
             {
-                try
+                for (int i = 0; i < mPorts.Count(); i++)
                 {
-                    for (int i = 0; i < mPorts.Count(); i++)
+                    try
                     {
                         clients[i] = new SerialPort(mPorts[i].mPortName, mBaudrate, mParity, mDataBits, mStopBits);
+                        clients[i].ErrorReceived += delegate(object sender, SerialErrorReceivedEventArgs e)
+                        {
+                            RtuConnected[i] = false;
+                            ExTimer reconnect_timer = new ExTimer();
+                            reconnect_timer.AutoReset = true;
+                            reconnect_timer.Interval = 10 * 1000;
+                            reconnect_timer.Elapsed += delegate(object t_sender, ElapsedEventArgs t_e)
+                            {
+                                if (!RtuConnected[i])
+                                {
+                                    Connect(i);
+                                }
+                            };
+                        };
                         clients[i].Open();
                         masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
-                        ExTimer timer = new ExTimer();
-                        timer.AutoReset = true;
-                        timer.Interval = 1000;
-                        timer.Elapsed += timer_Elapsed;
-                        timer.TimerID = i;
-                        timer.Start();
+                        masters[i].Transport.ReadTimeout = 300;
+                        RtuConnected[i] = true;
                     }
-                    return true;
+                    catch (Exception ex)
+                    {
+                        RtuConnected[i] = false;
+                        Log.LogException(ex);
+                    }
+                    ExTimer timer = new ExTimer();
+                    timer.AutoReset = false;
+                    timer.Interval = 1000;
+                    timer.Elapsed += timer_Elapsed;
+                    timer.TimerID = i;
+                    timer.Start();
                 }
-                catch (Exception ex)
-                {
-                    Log.LogException(ex);
-                    return false;
-                }
+                return true;
             }
             else
             {
@@ -191,6 +202,8 @@ namespace VoltageMeterReader.Helper
                     clients[index] = new SerialPort(mPorts[index].mPortName,mBaudrate,mParity,mDataBits,mStopBits);
                     clients[index].Open();
                     masters[index] = ModbusSerialMaster.CreateRtu(clients[index]);
+                    masters[index].Transport.ReadTimeout = 300;
+                    RtuConnected[index] = true;
                 }
                 catch (Exception ex)
                 {
@@ -199,6 +212,11 @@ namespace VoltageMeterReader.Helper
                 }
                 return true;
             }
+        }
+
+        void RtuHelper_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            
         }
 
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)

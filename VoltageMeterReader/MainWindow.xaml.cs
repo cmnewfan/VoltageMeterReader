@@ -33,6 +33,7 @@ namespace VoltageMeterReader
             {
                 new System.Windows.Application();
             }
+            mOpenMenuButton.Click += mOpenMenuButton_Click;
             mApplication = Application.Current;
             XDocument xml = XDocument.Load(Environment.CurrentDirectory + @"\configuration.xml");
             mPorts = (from Port in xml.Descendants("Port") 
@@ -59,6 +60,11 @@ namespace VoltageMeterReader
                 }
             }
             RtuHelper helper = new RtuHelper(mPorts,null);
+        }
+
+        void mOpenMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            GC.Collect();
         }
 
         private void SetDataBindings(View.VoltageMeter meter, RTUSlave rtuSlave)
