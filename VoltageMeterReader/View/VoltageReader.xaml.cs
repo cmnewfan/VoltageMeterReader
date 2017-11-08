@@ -21,18 +21,29 @@ namespace VoltageMeterReader.View
     /// </summary>
     /// 
     
-
-
     public partial class VoltageReader : UserControl
     {
         public VoltageReader()
         {
             InitializeComponent();
+            Binding.AddTargetUpdatedHandler(ReaderValue, ReaderHandler);
         }
 
-        public void setDataSource(Parameter source)
+        void ReaderHandler(object sender, DataTransferEventArgs e)
         {
-            ReaderValue.DataContext = source;
+            String value = ((TextBlock)sender).Text;
+            if (!value.Equals(""))
+            {
+                double mValue = double.Parse(((TextBlock)sender).Text);
+                if (mValue >= 10000.0d)
+                {
+                    ReaderValue.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    ReaderValue.Foreground = Brushes.Black;
+                }
+            }
         }
     }
 }

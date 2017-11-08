@@ -15,6 +15,7 @@ namespace VoltageMeterReader.Models
         public String mDisplayName;
         public List<ReadingList> mBoolReadingList;
         public List<ReadingList> mSingleReadingList;
+        public int mErrorCount = 0;
 
         public RTUSlave(byte slaveId, Parameter[] parameters, String name)
         {

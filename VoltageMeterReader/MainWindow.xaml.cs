@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,12 +11,14 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml.Linq;
 using VoltageMeterReader.Helper;
 using VoltageMeterReader.Models;
+using VoltageMeterReader.View;
 
 namespace VoltageMeterReader
 {
@@ -25,6 +29,8 @@ namespace VoltageMeterReader
     {
         Application mApplication;
         RTUSerialPort[] mPorts;
+        ObservableCollection<TextBlock> logs = new ObservableCollection<TextBlock>();
+        LogWindow log;
 
         public MainWindow()
         {
@@ -33,6 +39,7 @@ namespace VoltageMeterReader
             {
                 new System.Windows.Application();
             }
+            mListBox.ItemsSource = logs;
             mOpenMenuButton.Click += mOpenMenuButton_Click;
             mApplication = Application.Current;
             XDocument xml = XDocument.Load(Environment.CurrentDirectory + @"\configuration.xml");
@@ -51,7 +58,7 @@ namespace VoltageMeterReader
                     Grid.SetColumn(meter, column);
                     Grid.SetRow(meter, row);
                     column++;
-                    if (column == 3)
+                    if (column == mVoltageGrid.ColumnDefinitions.Count())
                     {
                         column = 0;
                         row++;
@@ -59,7 +66,29 @@ namespace VoltageMeterReader
                     SetDataBindings(meter, mPorts[i].mSlaves[j]);
                 }
             }
-            RtuHelper helper = new RtuHelper(mPorts,null);
+            RtuHelper helper = new RtuHelper(mPorts, OnMessage);
+        }
+
+        public void OnMessage(object o, LogLevel level)
+        {
+            if (logs.Count > 999)
+            {
+                logs.Clear();
+            }
+            mApplication.Dispatcher.Invoke(new Action(() =>
+                {
+                    TextBlock tb = new TextBlock();
+                    tb.Text = o.ToString();
+                    if (level == LogLevel.Error)
+                    {
+                        tb.Foreground = Brushes.Red;
+                    }
+                    else
+                    {
+                        tb.Foreground = Brushes.Black;
+                    }
+                    logs.Add(tb);
+                }));
         }
 
         void mOpenMenuButton_Click(object sender, RoutedEventArgs e)
@@ -79,6 +108,37 @@ namespace VoltageMeterReader
                 readers.Add(reader);
                 reader.ReaderName.Content = rtuSlave.mParameters[i].mName;
             }
+        }
+
+        private void OnClick(object sender, RoutedEventArgs e)
+        {
+            if (sender==mLogButton)
+            {
+                if (log == null)
+                {
+                    log = new LogWindow(logs);
+                    log.Show();
+                }
+                else
+                {
+                    log.Update(logs);
+                    log.Visibility = System.Windows.Visibility.Visible;
+                    log.Focus();
+                }
+            }
+        }
+
+        private void mLogButton_MouseEnter_1(object sender, MouseEventArgs e)
+        {
+            DoubleAnimation animation = new DoubleAnimation(0.2, 1.0, new Duration(TimeSpan.FromSeconds(1.0)));
+            mLogButton.BeginAnimation(Button.OpacityProperty, animation, HandoffBehavior.Compose);
+            mLogButton.FontSize = 20;
+            mLogButton.Content = "查看日志";
+        }
+
+        private void mLogButton_MouseLeave_1(object sender, MouseEventArgs e)
+        {
+            mLogButton.Content = "";
         }
     }
 }

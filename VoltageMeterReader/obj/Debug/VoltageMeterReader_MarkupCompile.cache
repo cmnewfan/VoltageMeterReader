@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\App.xaml
-3457190585
+4110521394
 
-13953535188
-13-1270581204
-MainWindow.xaml;View\VoltageMeter.xaml;View\VoltageReader.xaml;
+15-1075820528
+141609823391
+MainWindow.xaml;View\LogWindow.xaml;View\VoltageMeter.xaml;View\VoltageReader.xaml;
 
 False
 

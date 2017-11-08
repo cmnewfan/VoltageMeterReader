@@ -22,7 +22,7 @@ namespace VoltageMeterReader.Helper
         private Parity mParity;
         private int mDataBits;
         private StopBits mStopBits;
-        public delegate void ChangedEventHandler(object o, ProgressChangedEventArgs e);
+        public delegate void ChangedEventHandler(object o, LogLevel level);
         private event ChangedEventHandler ValueUpdatedRequest;
         //private Dictionary<ushort, bool> UnfinishedWork = new Dictionary<ushort, bool>();
         //private object UnfinishedWorkLock = new object();
@@ -43,48 +43,53 @@ namespace VoltageMeterReader.Helper
                 mDataBits = dataBits;
                 mParity = parity;
                 mStopBits = stopBits;
-                Connect();
                 ValueUpdatedRequest += handler;
-                
+                Connect();
             }
             
         }
 
-        void timer_Elapsed(object sender, ElapsedEventArgs e)
+        void slave_timer_elapsed(object slave_sender, ElapsedEventArgs slave_e)
         {
-            /*BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += worker_DoWork;
-            worker.WorkerReportsProgress = true;
-            worker.ProgressChanged += worker_ProgressChanged;
-            worker.RunWorkerAsync();*/
-            int PortID = ((ExTimer)sender).TimerID;
-            for (int i=0;i<mPorts[PortID].mSlaves.Count();i++)
+            int slaveID = ((ExTimer)slave_sender).TimerID;
+            int num = 0;
+            int PortID = ((int[])((ExTimer)slave_sender).Tag)[0];
+            if (RtuConnected[PortID])
             {
-                RTUSlave slave = mPorts[PortID].mSlaves[i];
-                ExTimer timer = new ExTimer();
-                timer.TimerID = i;
-                timer.AutoReset = true;
-                timer.Interval = 1000;
-                timer.Elapsed += delegate(object slave_sender, ElapsedEventArgs slave_e)
+                foreach (ReadingList list in mPorts[PortID].mSlaves[slaveID].mSingleReadingList)
                 {
-                    int slaveID = ((ExTimer)slave_sender).TimerID;
-                    int num = 0;
-                    if (RtuConnected[PortID])
+                    try
                     {
-                        foreach (ReadingList list in slave.mSingleReadingList)
+                        var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                        for (int j = 0; j < list.mNum; j++)
                         {
-                            var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
-                            for (int j = 0; j < list.mNum; j++)
-                            {
-                                Parameter param = mPorts[PortID].mSlaves[slaveID].mSingleParameters[num];
-                                int low = c[j * 2];
-                                int high = c[j * 2 + 1];
-                                param.mValue = modbusToFloat(high, low);
-                                num++;
-                            }
+                            Parameter param = mPorts[PortID].mSlaves[slaveID].mSingleParameters[num];
+                            int low = c[j * 2];
+                            int high = c[j * 2 + 1];
+                            param.mValue = modbusToFloat(high, low);
+                            num++;
                         }
-                        num = 0;
-                        foreach (ReadingList list in slave.mBoolReadingList)
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                    }
+                    catch (Exception)
+                    {
+                        num += list.mNum;
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount++;
+                        if (mPorts[PortID].mSlaves[slaveID].mErrorCount >= 60)
+                        {
+                            mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                            ValueUpdatedRequest(mPorts[PortID].mPortName + "的下属" + mPorts[PortID].mSlaves[slaveID].mDisplayName + "读取错误",LogLevel.Error);
+                        }
+                        continue;
+                    }
+                    
+                }
+                num = 0;
+                foreach (ReadingList list in mPorts[PortID].mSlaves[slaveID].mBoolReadingList)
+                {
+                    try
+                    {
+                        using (ModbusSerialMaster master = masters[PortID])
                         {
                             var c = masters[PortID].ReadCoils(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
                             for (int j = 0; j < list.mNum; j++)
@@ -94,8 +99,36 @@ namespace VoltageMeterReader.Helper
                                 num++;
                             }
                         }
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
                     }
-                };
+                    catch (Exception)
+                    {
+                        num += list.mNum;
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount++;
+                        if (mPorts[PortID].mSlaves[slaveID].mErrorCount >= 60)
+                        {
+                            mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                            ValueUpdatedRequest(mPorts[PortID].mPortName + "的下属" + mPorts[PortID].mSlaves[slaveID].mDisplayName + "读取错误", LogLevel.Error);
+                        }
+                        continue;
+                    }
+                }
+            }
+            ((ExTimer)slave_sender).Start();
+        }
+
+        void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            int PortID = ((ExTimer)sender).TimerID;
+            for (int i=0;i<mPorts[PortID].mSlaves.Count();i++)
+            {
+                RTUSlave slave = mPorts[PortID].mSlaves[i];
+                ExTimer timer = new ExTimer();
+                timer.TimerID = i;
+                timer.AutoReset = false;
+                timer.Interval = 1000;
+                timer.Tag = new int[] { PortID, i };
+                timer.Elapsed += slave_timer_elapsed;
                 timer.Start();
             }
         }
@@ -172,11 +205,13 @@ namespace VoltageMeterReader.Helper
                         masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
                         masters[i].Transport.ReadTimeout = 300;
                         RtuConnected[i] = true;
+                        ValueUpdatedRequest(mPorts[i].mPortName + "连接成功", LogLevel.Event);
                     }
                     catch (Exception ex)
                     {
                         RtuConnected[i] = false;
                         Log.LogException(ex);
+                        ValueUpdatedRequest(mPorts[i].mPortName+"连接失败",LogLevel.Error);
                     }
                     ExTimer timer = new ExTimer();
                     timer.AutoReset = false;
@@ -204,24 +239,16 @@ namespace VoltageMeterReader.Helper
                     masters[index] = ModbusSerialMaster.CreateRtu(clients[index]);
                     masters[index].Transport.ReadTimeout = 300;
                     RtuConnected[index] = true;
+                    ValueUpdatedRequest(mPorts[index].mPortName + "连接成功", LogLevel.Event);
                 }
                 catch (Exception ex)
                 {
                     Log.LogException(ex);
+                    ValueUpdatedRequest(mPorts[index].mPortName + "连接失败", LogLevel.Error);
                     return false;
                 }
                 return true;
             }
-        }
-
-        void RtuHelper_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
-        {
-            
-        }
-
-        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            ValueUpdatedRequest(e.UserState, e);
         }
 
         float modbusToFloat(int x1, int x2)
@@ -235,62 +262,6 @@ namespace VoltageMeterReader.Helper
             weishu = (float)(exponentRest * 65536 + x2) / 8388608;
             value = (float)Math.Pow(-1, fuhao) * (float)Math.Pow(2, exponent - 127) * (weishu + 1);
             return value;
-        }
-
-        void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            BackgroundWorker bgWorker = sender as BackgroundWorker;
-            bool[] ServerConnected = new bool[mPorts.Count()];
-            //while (true)
-            //{
-                for (int i = 0; i < mPorts.Count(); i++)
-                {
-                    if (ServerConnected[i])
-                    {
-                        foreach(RTUSlave slave in mPorts[i].mSlaves)
-                        {
-                            foreach (Parameter parameter in slave.mParameters)
-                            {
-                                try
-                                {
-                                    if (parameter.mType.Equals("Single"))
-                                    {
-                                        var c = masters[i].ReadHoldingRegisters(slave.mSlaveId, parameter.mAddress, 2);
-                                        int low = c[0];
-                                        int high = c[1];
-                                        parameter.mValue = modbusToFloat(high, low);
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.LogException(ex);
-                                    ServerConnected[i] = Connect(i);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ServerConnected[i] = Connect(i);
-                    }
-                }
-            //}
-        }
-         
-
-        private bool ReConnect(BackgroundWorker bgWorker, bool ServerConnected)
-        {
-            bgWorker.ReportProgress(-1, "读取Modbus服务器数据失败,正在重连");
-            ServerConnected = Connect();
-            if (ServerConnected)
-            {
-                bgWorker.ReportProgress(-1, "连接成功");
-            }
-            else
-            {
-                bgWorker.ReportProgress(-1, "连接失败");
-            }
-            return ServerConnected;
         }
     }
 }

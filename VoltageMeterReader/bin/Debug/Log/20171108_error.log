@@ -1,0 +1,8 @@
+2017/11/8 11:18:15:未将对象引用设置到对象的实例。
+2017/11/8 11:18:15:   在 VoltageMeterReader.Helper.RtuHelper.Connect(Int32 index) 位置 c:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\Helpers\RtuHelper.cs:行号 208
+2017/11/8 11:28:05:未将对象引用设置到对象的实例。
+2017/11/8 11:28:05:   在 VoltageMeterReader.Helper.RtuHelper.Connect(Int32 index) 位置 c:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\Helpers\RtuHelper.cs:行号 208
+2017/11/8 11:28:32:未将对象引用设置到对象的实例。
+2017/11/8 11:28:32:   在 VoltageMeterReader.Helper.RtuHelper.Connect(Int32 index) 位置 c:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\Helpers\RtuHelper.cs:行号 208
+2017/11/8 11:29:06:未将对象引用设置到对象的实例。
+2017/11/8 11:29:06:   在 VoltageMeterReader.Helper.RtuHelper.Connect(Int32 index) 位置 c:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\Helpers\RtuHelper.cs:行号 208

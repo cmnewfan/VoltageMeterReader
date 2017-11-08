@@ -5,12 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:view="clr-namespace:VoltageMeterReader.View"
              mc:Ignorable="d" 
-             d:DesignHeight="320" d:DesignWidth="400">
-    <Border BorderThickness="10" Background="#FF4093AE" Width="400" Height="320" HorizontalAlignment="Center" VerticalAlignment="Bottom" BorderBrush="#FFCFC8C8">
-        <Grid Name="Voltage" Background="White" ShowGridLines="True" Width="360" Height="280">
+             d:DesignHeight="320" d:DesignWidth="320">
+    <Border BorderThickness="10" Background="#FF4093AE" Width="320" Height="320" HorizontalAlignment="Center" VerticalAlignment="Bottom" BorderBrush="#FFCFC8C8">
+        <Grid Name="Voltage" Background="White" ShowGridLines="True" Width="300" Height="320">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"></RowDefinition>
-                <RowDefinition Height="30*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Content="Voltage" Name="VoltageLabel" HorizontalAlignment="Center"></Label>
             <ListView Name="mListView" Grid.Row="1"></ListView>

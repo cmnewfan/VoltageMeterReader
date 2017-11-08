@@ -2,27 +2,40 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:view="clr-namespace:VoltageMeterReader.View"
-        Title="VoltageMeterReader" Height="1680" Width="1050" WindowState="Maximized" WindowStyle="SingleBorderWindow">
+        Title="VoltageMeterReader" Height="800" Width="1280" WindowState="Maximized" WindowStyle="SingleBorderWindow">
     
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"></RowDefinition>
+            <RowDefinition Height="640"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <Menu Name="mMenu" Grid.ColumnSpan="3">
+        <Menu Name="mMenu" Grid.Row="0" Grid.ColumnSpan="3">
             <MenuItem Name="mOpenMenuButton" Header="打开"></MenuItem>
         </Menu>
         <Grid Name="mVoltageGrid" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="320"></RowDefinition>
                 <RowDefinition Height="320"></RowDefinition>
-                <RowDefinition Height="320"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400"></ColumnDefinition>
-                <ColumnDefinition Width="400"></ColumnDefinition>
-                <ColumnDefinition Width="400"></ColumnDefinition>
+                <ColumnDefinition Width="320"></ColumnDefinition>
+                <ColumnDefinition Width="320"></ColumnDefinition>
+                <ColumnDefinition Width="320"></ColumnDefinition>
+                <ColumnDefinition Width="320"></ColumnDefinition>
             </Grid.ColumnDefinitions>
+        </Grid>
+        <Grid Name="mLogGrid" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Name="mLogButton" Grid.Column="0" ClickMode="Press" Click="OnClick" Focusable="False" MouseEnter="mLogButton_MouseEnter_1" MouseLeave="mLogButton_MouseLeave_1" TextOptions.TextHintingMode="Animated">
+                <Button.Background>
+                    <ImageBrush ImageSource="/Resources/logs.png" Stretch="UniformToFill"/>
+                </Button.Background>
+            </Button>
+            <ListBox Name="mListBox" FontSize="15" Grid.Column="1"></ListBox>
         </Grid>
     </Grid>
 </Window>

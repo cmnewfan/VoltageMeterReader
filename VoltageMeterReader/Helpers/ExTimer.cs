@@ -10,5 +10,6 @@ namespace VoltageMeterReader.Helpers
     class ExTimer : Timer
     {
         public int TimerID;
+        public object Tag;
     }
 }

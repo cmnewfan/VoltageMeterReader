@@ -5,16 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:data="clr-namespace:VoltageMeterReader.Models"
              mc:Ignorable="d" 
-             d:DesignHeight="30" d:DesignWidth="360">
+             d:DesignHeight="30" d:DesignWidth="320">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="180"></ColumnDefinition>
-            <ColumnDefinition Width="180"></ColumnDefinition>
+            <ColumnDefinition Width="160"></ColumnDefinition>
+            <ColumnDefinition Width="160"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
         <Label Name="ReaderName" Content="VoltageReader" HorizontalAlignment="Center" Grid.Column="0"></Label>
-        <Label Name="ReaderValue" Content="{Binding Path=mValue}" HorizontalAlignment="Center" Grid.Column="1"></Label>
+        <TextBlock Name="ReaderValue" Text="{Binding Path=mValue, NotifyOnTargetUpdated=True}" HorizontalAlignment="Center" Grid.Column="1"></TextBlock>
     </Grid>
 </UserControl>
