@@ -20,4 +20,6 @@ C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMe
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.csproj.GenerateResource.Cache
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.exe
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.pdb
+C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\SwitchDialog.baml
+C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\SwitchDialog.g.cs
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.csprojResolveAssemblyReference.cache

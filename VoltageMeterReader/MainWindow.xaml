@@ -14,16 +14,7 @@
             <MenuItem Name="mOpenMenuButton" Header="打开"></MenuItem>
         </Menu>
         <Grid Name="mVoltageGrid" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="320"></RowDefinition>
-                <RowDefinition Height="320"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="320"></ColumnDefinition>
-                <ColumnDefinition Width="320"></ColumnDefinition>
-                <ColumnDefinition Width="320"></ColumnDefinition>
-                <ColumnDefinition Width="320"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
+
         </Grid>
         <Grid Name="mLogGrid" Grid.Row="2">
             <Grid.ColumnDefinitions>

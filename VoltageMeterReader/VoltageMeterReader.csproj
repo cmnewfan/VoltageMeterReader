@@ -65,6 +65,9 @@
     <Compile Include="View\LogWindow.xaml.cs">
       <DependentUpon>LogWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\SwitchDialog.xaml.cs">
+      <DependentUpon>SwitchDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\VoltageMeter.xaml.cs">
       <DependentUpon>VoltageMeter.xaml</DependentUpon>
     </Compile>
@@ -86,6 +89,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\LogWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\SwitchDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -136,6 +143,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logs.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\jump.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -31,6 +31,9 @@ namespace VoltageMeterReader
         RTUSerialPort[] mPorts;
         ObservableCollection<TextBlock> logs = new ObservableCollection<TextBlock>();
         LogWindow log;
+        private int PageCount = 0;
+        private int rowCount = 0;
+        private int columnCount = 0;
 
         public MainWindow()
         {
@@ -47,25 +50,31 @@ namespace VoltageMeterReader
                       select new RTUSerialPort((from Slave in Port.Descendants("Slave") 
                                                 select new RTUSlave(byte.Parse(Slave.Attribute("SlaveId").Value), (from Parameter in Slave.Descendants("Parameter") 
                                                                                                                    select new Parameter(Parameter.Attribute("Type").Value, ushort.Parse(Parameter.Attribute("Address").Value), Parameter.Attribute("Name").Value)).ToArray<Parameter>(), Slave.Attribute("SlaveName").Value)).ToArray<RTUSlave>(), Port.Attribute("PortName").Value, Port.Attribute("DisplayName").Value)).ToArray<RTUSerialPort>();
-            int row = 0;
-            int column = 0;
-            for (int i = 0; i < mPorts.Count(); i++)
+            Loaded += delegate
             {
-                for (int j = 0; j < mPorts[i].mSlaves.Count(); j++)
+                rowCount = (int)Math.Floor(mVoltageGrid.ActualHeight / 320);
+                columnCount = (int)Math.Floor(mVoltageGrid.ActualWidth / 320);
+                PageCount = 0;
+                for (int i = 0; i < mPorts.Count(); i++)
                 {
-                    VoltageMeterReader.View.VoltageMeter meter = new View.VoltageMeter();
-                    mVoltageGrid.Children.Add(meter);
-                    Grid.SetColumn(meter, column);
-                    Grid.SetRow(meter, row);
-                    column++;
-                    if (column == mVoltageGrid.ColumnDefinitions.Count())
+                    for (int j = 0; j < mPorts[i].mSlaves.Count(); j++)
                     {
-                        column = 0;
-                        row++;
+                        PageCount++;
                     }
-                    SetDataBindings(meter, mPorts[i].mSlaves[j]);
                 }
-            }
+                var x = PageCount / (rowCount * columnCount);
+                var y = PageCount % (rowCount * columnCount); ;
+                PageCount = y > 0 ? x + 1 : x;
+                for (int i = 0; i < rowCount; i++)
+                {
+                    mVoltageGrid.RowDefinitions.Add(new RowDefinition());
+                }
+                for (int i = 0; i < columnCount; i++)
+                {
+                    mVoltageGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                }
+                JumpToPage(1);
+            };
             RtuHelper helper = new RtuHelper(mPorts, OnMessage);
         }
 
@@ -78,7 +87,7 @@ namespace VoltageMeterReader
             mApplication.Dispatcher.Invoke(new Action(() =>
                 {
                     TextBlock tb = new TextBlock();
-                    tb.Text = o.ToString();
+                    tb.Text = new StringBuilder(DateTime.Now.ToString()).Append(@":").Append(o.ToString()).ToString();
                     if (level == LogLevel.Error)
                     {
                         tb.Foreground = Brushes.Red;
@@ -91,21 +100,97 @@ namespace VoltageMeterReader
                 }));
         }
 
+        void unBindData()
+        {
+            for (int i = 0; i < mVoltageGrid.Children.Count; i++)
+            {
+                VoltageMeter meter = mVoltageGrid.Children[i] as VoltageMeter;
+                for (int j = 0; j < meter.mMeterGrid.Children.Count; j++)
+                {
+                    VoltageReader reader = meter.mMeterGrid.Children[j] as VoltageReader;
+                    //BindingOperations.ClearAllBindings(reader);
+                    reader.DataContext = null;
+                    reader.ReaderName.Content = null;
+                }
+                meter.mMeterGrid.Children.Clear();
+            }
+            mVoltageGrid.Children.Clear();
+        }
+
+        void JumpToPage(int PageIndex)
+        {
+            unBindData();
+            int column = 0;
+            int row = 0;
+            int startIndex = rowCount * columnCount * (PageIndex - 1);
+            int voltageCount = 0;
+            int num = 0;
+            if (PageIndex != 0)
+            {
+                for (int i = 0; i < mPorts.Count(); i++)
+                {
+                    for (int j = 0; j < mPorts[i].mSlaves.Count(); j++)
+                    {
+                        if (num < startIndex)
+                        {
+                            num++;
+                            continue;
+                        }
+                        num++;
+                        if (voltageCount >= rowCount * columnCount)
+                        {
+                            break;
+                        }
+                        VoltageMeterReader.View.VoltageMeter meter = new View.VoltageMeter();
+                        mVoltageGrid.Children.Add(meter);
+                        Grid.SetColumn(meter, column);
+                        Grid.SetRow(meter, row);
+                        column++;
+                        if (column == columnCount)
+                        {
+                            column = 0;
+                            row++;
+                        }
+                        voltageCount++;
+                        SetDataBindings(meter, mPorts[i].mSlaves[j]);
+                    }
+                }
+            }
+        }
+
         void mOpenMenuButton_Click(object sender, RoutedEventArgs e)
         {
-            GC.Collect();
+            SwitchDialog dialog = new SwitchDialog(PageCount);
+            dialog.Owner = this;
+            if (dialog.ShowDialog() == true)
+            {
+                JumpToPage(dialog.inputIndex);
+            }
         }
 
         private void SetDataBindings(View.VoltageMeter meter, RTUSlave rtuSlave)
         {
             meter.setName(rtuSlave.mDisplayName);
-            List<View.VoltageReader> readers = new List<View.VoltageReader>();
-            meter.mListView.ItemsSource = readers;
+            //List<View.VoltageReader> readers = new List<View.VoltageReader>();
+            //meter.mMeterGrid.Children. = readers;
+            int column=0;
+            int row=0;
+            meter.mMeterGrid.RowDefinitions.Add(new RowDefinition());
             for (int i = 0; i < rtuSlave.mParameters.Count(); i++)
             {
                 View.VoltageReader reader = new View.VoltageReader();
+                meter.mMeterGrid.Children.Add(reader);
+                Grid.SetColumn(reader, column);
+                Grid.SetRow(reader, row);
+                column++;
+                if (column == meter.mMeterGrid.ColumnDefinitions.Count())
+                {
+                    meter.mMeterGrid.RowDefinitions.Add(new RowDefinition());
+                    column = 0;
+                    row++;
+                }
                 reader.DataContext = rtuSlave.mParameters[i];
-                readers.Add(reader);
+                //readers.Add(reader);
                 reader.ReaderName.Content = rtuSlave.mParameters[i].mName;
             }
         }

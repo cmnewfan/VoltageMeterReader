@@ -203,7 +203,7 @@ namespace VoltageMeterReader.Helper
                         };
                         clients[i].Open();
                         masters[i] = ModbusSerialMaster.CreateRtu(clients[i]);
-                        masters[i].Transport.ReadTimeout = 300;
+                        masters[i].Transport.ReadTimeout = 200;
                         RtuConnected[i] = true;
                         ValueUpdatedRequest(mPorts[i].mPortName + "连接成功", LogLevel.Event);
                     }
