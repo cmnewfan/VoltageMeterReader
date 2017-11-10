@@ -23,3 +23,5 @@ C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMe
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\SwitchDialog.baml
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\SwitchDialog.g.cs
 C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\VoltageMeterReader.csprojResolveAssemblyReference.cache
+C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\ConfigDialog.baml
+C:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\obj\Debug\View\ConfigDialog.g.cs

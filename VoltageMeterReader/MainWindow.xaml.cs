@@ -44,6 +44,7 @@ namespace VoltageMeterReader
             }
             mListBox.ItemsSource = logs;
             mOpenMenuButton.Click += mOpenMenuButton_Click;
+            mSettingMenuButton.Click += mSettingMenuButton_Click;
             mApplication = Application.Current;
             XDocument xml = XDocument.Load(Environment.CurrentDirectory + @"\configuration.xml");
             mPorts = (from Port in xml.Descendants("Port") 
@@ -74,8 +75,23 @@ namespace VoltageMeterReader
                     mVoltageGrid.ColumnDefinitions.Add(new ColumnDefinition());
                 }
                 JumpToPage(1);
+                ConfigDialog dialog = new ConfigDialog(true);
+                dialog.Owner = this;
+                if (dialog.ShowDialog() == true)
+                {
+                    RtuHelper helper = new RtuHelper(mPorts, OnMessage, dialog.mBaudrate, dialog.mParity, dialog.mDataBits, dialog.mStopBit);
+                }
+                else
+                {
+                    RtuHelper helper = new RtuHelper(mPorts, OnMessage);
+                }
             };
-            RtuHelper helper = new RtuHelper(mPorts, OnMessage);
+        }
+
+        void mSettingMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            ConfigDialog dialog = new ConfigDialog(false);
+            dialog.ShowDialog();
         }
 
         public void OnMessage(object o, LogLevel level)

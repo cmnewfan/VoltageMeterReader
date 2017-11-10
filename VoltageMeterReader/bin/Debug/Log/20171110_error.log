@@ -1,0 +1,5 @@
+2017/11/10 10:30:27:端口“COM3”不存在。
+2017/11/10 10:30:27:   在 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   在 System.IO.Ports.SerialStream..ctor(String portName, Int32 baudRate, Parity parity, Int32 dataBits, StopBits stopBits, Int32 readTimeout, Int32 writeTimeout, Handshake handshake, Boolean dtrEnable, Boolean rtsEnable, Boolean discardNull, Byte parityReplace)
+   在 System.IO.Ports.SerialPort.Open()
+   在 VoltageMeterReader.Helper.RtuHelper.Connect(Int32 index) 位置 c:\Users\hzfd\Documents\Visual Studio 2012\Projects\VoltageMeterReader\VoltageMeterReader\Helpers\RtuHelper.cs:行号 283

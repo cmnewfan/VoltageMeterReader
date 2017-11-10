@@ -1,0 +1,65 @@
+﻿<Window x:Class="VoltageMeterReader.View.ConfigDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Config" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Image Source="/Resources/settings.png" Width="64" Height="64" Margin="5,0" />
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Label Content="Baudrate" Margin="10,5,0,0" Width="90" FontSize="15" HorizontalAlignment="Right" VerticalAlignment="Center"></Label>
+            <ComboBox Name="mBaudrateComboBox" Grid.Column="1" Width="100" Margin="10,10,5,5" SelectedIndex="5" FontSize="15" VerticalAlignment="Center">
+                <ComboBoxItem>300</ComboBoxItem>
+                <ComboBoxItem>600</ComboBoxItem>
+                <ComboBoxItem>1200</ComboBoxItem>
+                <ComboBoxItem>2400</ComboBoxItem>
+                <ComboBoxItem>4800</ComboBoxItem>
+                <ComboBoxItem>9600</ComboBoxItem>
+                <ComboBoxItem>14400</ComboBoxItem>
+                <ComboBoxItem>19200</ComboBoxItem>
+                <ComboBoxItem>38400</ComboBoxItem>
+                <ComboBoxItem>56000</ComboBoxItem>
+                <ComboBoxItem>57600</ComboBoxItem>
+                <ComboBoxItem>115200</ComboBoxItem>
+                <ComboBoxItem>128000</ComboBoxItem>
+                <ComboBoxItem>256000</ComboBoxItem>
+            </ComboBox>
+            <Label Grid.Row="1" Grid.Column="0" Margin="0,5,0,0" Width="90" FontSize="15" HorizontalAlignment="Right" VerticalAlignment="Center">Data Bits</Label>
+            <ComboBox Name="mDataBitsComboBox" Grid.Row="1" Grid.Column="1" Width="100" Margin="10,10,5,5" SelectedIndex="1" FontSize="15" VerticalAlignment="Center">
+                <ComboBoxItem>7</ComboBoxItem>
+                <ComboBoxItem>8</ComboBoxItem>
+            </ComboBox>
+            <Label Grid.Row="2" Grid.Column="0" Margin="0,5,0,0" Width="90" FontSize="15" HorizontalAlignment="Right" VerticalAlignment="Center">Parity</Label>
+            <ComboBox Name="mParityComboBox" Grid.Row="2" Grid.Column="1" Width="100" Margin="10,10,5,5" SelectedIndex="2" FontSize="15" VerticalAlignment="Center">
+                <ComboBoxItem>None</ComboBoxItem>
+                <ComboBoxItem>Odd</ComboBoxItem>
+                <ComboBoxItem>Even</ComboBoxItem>
+            </ComboBox>
+            <Label Grid.Row="3" Grid.Column="0" Margin="0,5,0,0" Width="90" FontSize="15" HorizontalAlignment="Right" VerticalAlignment="Center">Stop Bit(s)</Label>
+            <ComboBox Name="mStopBitComboBox" Grid.Row="3" Grid.Column="1" Width="100" Margin="10,10,5,5" SelectedIndex="0" FontSize="15" VerticalAlignment="Center">
+                <ComboBoxItem>1</ComboBoxItem>
+                <ComboBoxItem>2</ComboBoxItem>
+            </ComboBox>
+        </Grid>
+        <WrapPanel Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Margin="0,15,0,10">
+            <Button IsDefault="True" Name="btnDialogOk" Click="btnDialogOk_Click" MinWidth="60" Margin="0,0,10,0">确定</Button>
+            <Button IsCancel="True" Name="btnCancel" MinWidth="60">取消</Button>
+        </WrapPanel>
+    </Grid>
+</Window>

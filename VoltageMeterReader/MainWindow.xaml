@@ -11,7 +11,8 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Menu Name="mMenu" Grid.Row="0" Grid.ColumnSpan="3">
-            <MenuItem Name="mOpenMenuButton" Header="打开"></MenuItem>
+            <MenuItem Name="mOpenMenuButton" Header="跳转"></MenuItem>
+            <MenuItem Name="mSettingMenuButton" Header="设置"></MenuItem>
         </Menu>
         <Grid Name="mVoltageGrid" Grid.Row="1">
 

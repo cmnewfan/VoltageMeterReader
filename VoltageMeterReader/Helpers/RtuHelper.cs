@@ -9,6 +9,7 @@ using Modbus.Device;
 using VoltageMeterReader.Models;
 using System.Timers;
 using VoltageMeterReader.Helpers;
+using System.Threading;
 
 namespace VoltageMeterReader.Helper
 {
@@ -52,9 +53,12 @@ namespace VoltageMeterReader.Helper
         void slave_timer_elapsed(object slave_sender, ElapsedEventArgs slave_e)
         {
             int slaveID = ((ExTimer)slave_sender).TimerID;
-            int num = 0;
+            //int num = 0;
             int PortID = ((int[])((ExTimer)slave_sender).Tag)[0];
-            if (RtuConnected[PortID])
+            Thread thread = new Thread(new ParameterizedThreadStart(thread_exec));
+            thread.Start(slave_sender);
+            
+            /*if (RtuConnected[PortID])
             {
                 foreach (ReadingList list in mPorts[PortID].mSlaves[slaveID].mSingleReadingList)
                 {
@@ -113,8 +117,81 @@ namespace VoltageMeterReader.Helper
                         continue;
                     }
                 }
+            }*/
+            //((ExTimer)slave_sender).Start();
+        }
+
+        void thread_exec(object o)
+        {
+            int slaveID = ((ExTimer)o).TimerID;
+            int PortID = ((int[])((ExTimer)o).Tag)[0];
+            int num = 0;
+            if (RtuConnected[PortID])
+            {
+                foreach (ReadingList list in mPorts[PortID].mSlaves[slaveID].mSingleReadingList)
+                {
+                    try
+                    {
+                        //var c = masters[PortID].ReadHoldingRegisters(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                        var cb = masters[PortID].ReadHoldingRegistersAsync(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                        cb.Wait(20);
+                        var c = cb.Result;
+                        for (int j = 0; j < list.mNum; j++)
+                        {
+                            Parameter param = mPorts[PortID].mSlaves[slaveID].mSingleParameters[num];
+                            int low = c[j * 2];
+                            int high = c[j * 2 + 1];
+                            param.mValue = modbusToFloat(high, low);
+                            num++;
+                        }
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        num += list.mNum;
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount++;
+                        if (mPorts[PortID].mSlaves[slaveID].mErrorCount >= 60)
+                        {
+                            mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                            ValueUpdatedRequest(mPorts[PortID].mPortName + "的下属" + mPorts[PortID].mSlaves[slaveID].mDisplayName + "读取错误", LogLevel.Error);
+                        }
+                        continue;
+                    }
+
+                }
+                num = 0;
+                foreach (ReadingList list in mPorts[PortID].mSlaves[slaveID].mBoolReadingList)
+                {
+                    try
+                    {
+                        using (ModbusSerialMaster master = masters[PortID])
+                        {
+                            var cb = masters[PortID].ReadCoilsAsync(mPorts[PortID].mSlaves[slaveID].mSlaveId, list.mStartAddress, (ushort)(2 * list.mNum));
+                            cb.Wait(20);
+                            var c = cb.Result;
+                            for (int j = 0; j < list.mNum; j++)
+                            {
+                                Parameter param = mPorts[PortID].mSlaves[slaveID].mBoolParameters[num];
+                                param.mValue = c[j];
+                                num++;
+                            }
+                        }
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        num += list.mNum;
+                        mPorts[PortID].mSlaves[slaveID].mErrorCount++;
+                        if (mPorts[PortID].mSlaves[slaveID].mErrorCount >= 60)
+                        {
+                            mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
+                            ValueUpdatedRequest(mPorts[PortID].mPortName + "的下属" + mPorts[PortID].mSlaves[slaveID].mDisplayName + "读取错误", LogLevel.Error);
+                        }
+                        continue;
+                    }
+                }
             }
-            ((ExTimer)slave_sender).Start();
+            ((ExTimer)o).Start();
         }
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -130,6 +207,8 @@ namespace VoltageMeterReader.Helper
                 timer.Tag = new int[] { PortID, i };
                 timer.Elapsed += slave_timer_elapsed;
                 timer.Start();
+                //Thread thread = new Thread(new ParameterizedThreadStart(thread_exec));
+                //thread.Start(new int[] { PortID, i });
             }
         }
 
