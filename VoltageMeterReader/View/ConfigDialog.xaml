@@ -12,7 +12,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Image Source="/Resources/settings.png" Width="64" Height="64" Margin="5,0" />
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Margin="0,0,10,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>

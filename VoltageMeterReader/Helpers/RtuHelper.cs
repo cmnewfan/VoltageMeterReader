@@ -146,7 +146,7 @@ namespace VoltageMeterReader.Helper
                         }
                         mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         num += list.mNum;
                         mPorts[PortID].mSlaves[slaveID].mErrorCount++;
@@ -178,7 +178,7 @@ namespace VoltageMeterReader.Helper
                         }
                         mPorts[PortID].mSlaves[slaveID].mErrorCount = 0;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         num += list.mNum;
                         mPorts[PortID].mSlaves[slaveID].mErrorCount++;
@@ -288,6 +288,15 @@ namespace VoltageMeterReader.Helper
                     }
                     catch (Exception ex)
                     {
+                        ExTimer reconnect_timer = new ExTimer();
+                        reconnect_timer.Interval = 10000;
+                        reconnect_timer.AutoReset = false;
+                        reconnect_timer.TimerID = i;
+                        reconnect_timer.Elapsed += delegate(object sender, ElapsedEventArgs e)
+                        {
+                            RtuConnected[((ExTimer)sender).TimerID] = Connect(((ExTimer)sender).TimerID);
+                        };
+                        reconnect_timer.Start();
                         RtuConnected[i] = false;
                         Log.LogException(ex);
                         ValueUpdatedRequest(mPorts[i].mPortName+"连接失败",LogLevel.Error);
@@ -322,6 +331,14 @@ namespace VoltageMeterReader.Helper
                 }
                 catch (Exception ex)
                 {
+                    ExTimer reconnect_timer = new ExTimer();
+                    reconnect_timer.Interval = 10000;
+                    reconnect_timer.AutoReset = false;
+                    reconnect_timer.Elapsed += delegate
+                    {
+                        RtuConnected[index] = Connect(index);
+                    };
+                    reconnect_timer.Start();
                     Log.LogException(ex);
                     ValueUpdatedRequest(mPorts[index].mPortName + "连接失败", LogLevel.Error);
                     return false;
